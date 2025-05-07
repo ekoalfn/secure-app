@@ -1,46 +1,84 @@
-# Getting Started with Create React App
+# Secure React.js Application
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This application demonstrates best practices for securing React.js applications against common web vulnerabilities, with a focus on XSS (Cross-Site Scripting) and CSRF (Cross-Site Request Forgery) attacks.
 
-## Available Scripts
+## Security Features
 
-In the project directory, you can run:
+### XSS Protection
 
-### `npm start`
+1. **Input Sanitization**: All user-generated content is sanitized using DOMPurify before rendering.
+   - Location: `Profile.tsx` for both comments and bio preview sections
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+2. **Content Security Policy (CSP)**: Restricts the sources from which active content can be loaded.
+   - Location: `App.tsx` - CSP header implementation
+   - Blocks execution of malicious JavaScript injected via XSS attacks
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+3. **HttpOnly Cookies**: Authentication tokens are stored in HttpOnly cookies rather than localStorage.
+   - Location: `AuthContext.tsx` and `mockBackend.ts`
+   - Prevents JavaScript access to authentication tokens
 
-### `npm test`
+### CSRF Protection
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. **CSRF Tokens**: All state-changing operations require a valid CSRF token.
+   - Location: `AuthContext.tsx` - Interceptor to add CSRF token to requests
+   - Location: `ChangePassword.tsx` - Implementation of CSRF token in forms
 
-### `npm run build`
+2. **SameSite Cookie Attributes**: Cookies are restricted to same-site contexts.
+   - Location: `mockBackend.ts` - Cookie configuration with "SameSite=Strict"
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+3. **Double Submit Cookie Pattern**: CSRF tokens are both sent in headers and validated in request payload.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Additional Security Measures
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. **HTTP Security Headers**: Implementation of recommended security headers.
+   - Location: `index.tsx` - HTTP security headers setup
+   - X-Content-Type-Options: nosniff
+   - X-Frame-Options: DENY
+   - Referrer-Policy: strict-origin-when-cross-origin
+   - Strict-Transport-Security: max-age=31536000; includeSubDomains
 
-### `npm run eject`
+2. **Secure Password Requirements**: Stronger password policies.
+   - Location: `Register.tsx` - Minimum 8 character password length
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Features
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- User authentication (login/register)
+- Profile management
+- Password changing functionality
+- Comment system
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## Security in Comparison to Vulnerable Version
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+This application addresses all the security vulnerabilities present in the vulnerable version by implementing the following mitigations:
 
-## Learn More
+| Vulnerability | Vulnerable App | Secure App |
+|--------------|----------------|------------|
+| XSS via dangerouslySetInnerHTML | No sanitization | DOMPurify sanitization |
+| Authentication token exposure | localStorage storage | HttpOnly cookies |
+| CSRF attacks | No protection | CSRF tokens + SameSite cookies |
+| Content Security Policy | Absent | Strict CSP implemented |
+| HTTP Security Headers | Not implemented | Comprehensive headers |
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Installation and Running
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+# Install dependencies
+npm install
+
+# Run the application
+npm start
+```
+
+## Implementation Notes
+
+In a production environment, the security measures would be implemented server-side, especially:
+- Setting HttpOnly cookies
+- CSRF token generation and validation
+- Content-Security-Policy headers
+- Other HTTP security headers
+
+In this client-side demo, we simulate these server-side features to demonstrate the concepts.
+
+## License
+
+This project is for educational purposes only.

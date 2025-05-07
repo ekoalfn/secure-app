@@ -3,7 +3,16 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { setupMockBackend } from './mockBackend';
+import { initializeSecurity } from './security';
 
+// Initialize the mock backend
+setupMockBackend();
+
+// Initialize all security features
+initializeSecurity();
+
+// Create root and render app
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );

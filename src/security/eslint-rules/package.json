@@ -1,0 +1,8 @@
+{
+  "name": "eslint-plugin-react-security",
+  "version": "1.0.0",
+  "description": "ESLint plugin with rules to enhance React security",
+  "main": "index.js",
+  "author": "Security Team",
+  "license": "MIT"
+} 
