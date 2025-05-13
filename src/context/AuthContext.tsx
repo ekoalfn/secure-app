@@ -64,13 +64,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Login user
   const login = async (email: string, password: string) => {
     try {
-      await mockAPI.auth.login(email, password);
+      console.log('Login attempt for:', email);
+      const result = await mockAPI.auth.login(email, password);
+      console.log('Login successful:', result);
       
       // Fetch user data
       const userData = await mockAPI.auth.getUser();
+      console.log('User data retrieved:', userData);
+      
       setUser(userData);
       setIsAuthenticated(true);
     } catch (err) {
+      console.error('Login error:', err);
       throw err;
     }
   };
@@ -78,13 +83,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Register user
   const register = async (name: string, email: string, password: string) => {
     try {
-      await mockAPI.auth.register(name, email, password);
+      console.log('Registration attempt for:', email);
+      const result = await mockAPI.auth.register(name, email, password);
+      console.log('Registration successful:', result);
       
       // Fetch user data
       const userData = await mockAPI.auth.getUser();
+      console.log('User data retrieved:', userData);
+      
       setUser(userData);
       setIsAuthenticated(true);
     } catch (err) {
+      console.error('Registration error:', err);
       throw err;
     }
   };

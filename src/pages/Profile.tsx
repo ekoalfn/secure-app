@@ -3,6 +3,7 @@ import { AuthContext } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import DOMPurify from 'dompurify';
 import { useXSSDetection, useSecurityMonitoring, useCSRFToken } from '../security';
+import SecureHtml from '../components/SecureHtml';
 
 // TrustedHTML type
 type TrustedHTML = any;
@@ -95,9 +96,13 @@ const Profile: React.FC = () => {
     }
   };
   
-  // Safe HTML rendering with proper typing
-  const createSafeHTML = (content: string): { __html: string | TrustedHTML } => {
-    return { __html: DOMPurify.sanitize(content) };
+  // Define sanitization options
+  const sanitizeOptions = {
+    ALLOWED_TAGS: ['p', 'br', 'b', 'i', 'em', 'strong', 'a', 'ul', 'ol', 'li'],
+    ALLOWED_ATTR: ['href', 'target', 'rel'],
+    FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form', 'input'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
+    ALLOW_DATA_ATTR: false
   };
 
   if (!user) {
@@ -190,8 +195,12 @@ const Profile: React.FC = () => {
               {comments.length > 0 ? (
                 comments.map(comment => (
                   <div key={comment.id} className="comment">
-                    {/* Safe rendering with trusted types and sanitized HTML */}
-                    <div dangerouslySetInnerHTML={createSafeHTML(comment.text)} />
+                    {/* Using SecureHtml component instead of dangerouslySetInnerHTML */}
+                    <SecureHtml 
+                      content={comment.text} 
+                      sanitizeOptions={sanitizeOptions}
+                      className="comment-content"
+                    />
                   </div>
                 ))
               ) : (
@@ -203,8 +212,12 @@ const Profile: React.FC = () => {
 
         <div className="profile-section">
           <h2>Bio Preview</h2>
-          {/* Safe rendering with trusted types and sanitized HTML */}
-          <div className="bio-preview" dangerouslySetInnerHTML={createSafeHTML(bio)} />
+          {/* Using SecureHtml component instead of dangerouslySetInnerHTML */}
+          <SecureHtml 
+            content={bio} 
+            sanitizeOptions={sanitizeOptions}
+            className="bio-preview" 
+          />
         </div>
       </div>
     </div>
