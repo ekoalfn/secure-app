@@ -10,7 +10,7 @@ import https from 'https';
 import fs from 'fs';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 const HTTPS_PORT = process.env.HTTPS_PORT || 3443;
 
 // Generate CSP nonce
@@ -29,7 +29,7 @@ app.use((req: express.Request, res: express.Response, next: express.NextFunction
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'", `'nonce-${nonce}'`],
-        styleSrc: ["'self'", `'nonce-${nonce}'`],
+        styleSrc: ["'self'", `'nonce-${nonce}'`, "'unsafe-inline'"],
         imgSrc: ["'self'", "data:"],
         connectSrc: ["'self'"],
         fontSrc: ["'self'"],

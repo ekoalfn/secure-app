@@ -1,0 +1,79 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const trustedTypes_1 = require("../../security/trustedTypes");
+const dompurify_1 = __importDefault(require("dompurify"));
+// Mock DOMPurify
+jest.mock('dompurify', () => ({
+    sanitize: jest.fn((content) => `sanitized-${content}`),
+}));
+// Mock window.trustedTypes
+const mockCreatePolicy = jest.fn();
+const mockGetPolicy = jest.fn();
+Object.defineProperty(window, 'trustedTypes', {
+    value: {
+        createPolicy: mockCreatePolicy,
+        getPolicy: mockGetPolicy,
+    },
+    writable: true,
+});
+describe('trustedTypes module', () => {
+    describe('sanitizers', () => {
+        beforeEach(() => {
+            jest.clearAllMocks();
+        });
+        test('htmlSanitizer should use DOMPurify.sanitize when trustedTypes not available', () => {
+            // Remove trustedTypes temporarily for this test
+            const originalTrustedTypes = window.trustedTypes;
+            delete window.trustedTypes;
+            const html = '<script>alert("XSS")</script>';
+            trustedTypes_1.sanitizers.htmlSanitizer(html);
+            expect(dompurify_1.default.sanitize).toHaveBeenCalledWith(html);
+            // Restore trustedTypes
+            window.trustedTypes = originalTrustedTypes;
+        });
+        test('urlSanitizer should allow valid URLs', () => {
+            const validUrl = 'https://example.com/page';
+            const result = trustedTypes_1.sanitizers.urlSanitizer(validUrl);
+            expect(result).toBe(validUrl);
+        });
+        test('urlSanitizer should reject javascript: URLs', () => {
+            const maliciousUrl = 'javascript:alert("XSS")';
+            const result = trustedTypes_1.sanitizers.urlSanitizer(maliciousUrl);
+            expect(result).toBe('');
+        });
+        test('urlSanitizer should reject data: URLs', () => {
+            const maliciousUrl = 'data:text/html,<script>alert("XSS")</script>';
+            const result = trustedTypes_1.sanitizers.urlSanitizer(maliciousUrl);
+            expect(result).toBe('');
+        });
+    });
+    describe('createSanitizedContent', () => {
+        beforeEach(() => {
+            jest.clearAllMocks();
+            dompurify_1.default.sanitize.mockImplementation((content) => `sanitized-${content}`);
+        });
+        test('should sanitize HTML content correctly', () => {
+            const html = '<script>alert("XSS")</script>';
+            const result = (0, trustedTypes_1.createSanitizedContent)(html, 'html');
+            expect(result).toEqual({ __html: `sanitized-${html}` });
+        });
+        test('should sanitize URL content correctly', () => {
+            const url = 'https://example.com';
+            const result = (0, trustedTypes_1.createSanitizedContent)(url, 'url');
+            // URL sanitizer doesn't use DOMPurify directly, it uses the urlSanitizer function
+            expect(result).toBe(url);
+        });
+        test('should sanitize script content correctly', () => {
+            const script = 'console.log("test")';
+            (0, trustedTypes_1.createSanitizedContent)(script, 'script');
+            // Script sanitizer calls DOMPurify with specific options
+            expect(dompurify_1.default.sanitize).toHaveBeenCalledWith(script, {
+                ALLOWED_TAGS: [],
+                ALLOWED_ATTR: []
+            });
+        });
+    });
+});

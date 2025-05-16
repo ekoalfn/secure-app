@@ -13,12 +13,6 @@ import ChangePassword from './pages/ChangePassword';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 
-// CSP directive setup - React injects this into the HTML
-const cspMeta = document.createElement('meta');
-cspMeta.httpEquiv = 'Content-Security-Policy';
-cspMeta.content = "default-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'";
-document.head.appendChild(cspMeta);
-
 function App() {
   return (
     <AuthProvider>

@@ -130,6 +130,35 @@ router.put('/users/change-password', requireAuth, csrfMiddleware, validateChange
   }
 });
 
+// New change-password endpoint for CSRF simulation
+router.post('/users/change-password', requireAuth, csrfMiddleware, validateChangePassword, async (req: Request, res: Response) => {
+  try {
+    const { oldPassword, newPassword, csrfToken } = req.body;
+    // Use mock service directly
+    const result = await mockServices.users.changePassword(oldPassword, newPassword, csrfToken);
+    
+    // Set secure headers for sensitive operations
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('Pragma', 'no-cache');
+    
+    res.json(result);
+  } catch (error: any) {
+    res.status(400).json({ message: 'Password change failed' });
+  }
+});
+
+// New update profile endpoint
+router.post('/users/profile', requireAuth, csrfMiddleware, validateUpdateProfile, async (req: Request, res: Response) => {
+  try {
+    const { data, csrfToken } = req.body;
+    // Use mock service directly
+    const result = await mockServices.users.updateProfile(data, csrfToken);
+    res.json(result);
+  } catch (error: any) {
+    res.status(400).json({ message: 'Update failed' });
+  }
+});
+
 // CSRF token endpoint
 router.get('/auth/csrf-token', requireAuth, getCSRFToken);
 
